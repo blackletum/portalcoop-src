@@ -11,6 +11,7 @@
 #include "vphysics/object_hash.h"
 #include "model_types.h"
 #include "portal/weapon_physcannon.h" //grab controllers
+#include "debugoverlay_shared.h"
 
 #ifdef CLIENT_DLL
 //#include "trains.h"
@@ -458,7 +459,6 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 		//Assert( pPlayer );
 
 		CBaseEntity *pLookingForEntity = (CBaseEntity *)pSource->GetGameData();
-#ifdef GAME_DLL
 		CBasePlayer *pHoldingPlayer = GetPlayerHoldingEntity( pLookingForEntity );
 		if( pHoldingPlayer )
 		{
@@ -467,9 +467,6 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 			if ( !pGrabController )
 				pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
 		}
-#else
-		pGrabController = pLookingForEntity->GetGrabController();
-#endif
 		AssertMsg( pGrabController, "Physics object is held, but we can't find the holding controller." );
 				
 		GetSavedParamsForCarriedPhysObject( pGrabController, pSource, &fSavedMass, &fSavedRotationalDamping );
