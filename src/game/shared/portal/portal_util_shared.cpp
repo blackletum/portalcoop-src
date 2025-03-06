@@ -351,6 +351,7 @@ void UTIL_Portal_Trace_Filter( CTraceFilterSimpleClassnameList *traceFilterPorta
 	traceFilterPortalShot->AddClassnameToIgnore( "updateitem2" ); 
 	traceFilterPortalShot->AddClassnameToIgnore( "weapon_portalgun" ); 
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_box" ); 
+	traceFilterPortalShot->AddClassnameToIgnore( "prop_radio" ); 
 }
 
 CProp_Portal* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeCloserThan )
@@ -2408,8 +2409,7 @@ void UTIL_Portal_ComputeMatrix( CProp_Portal *pLocalPortal, CProp_Portal *pRemot
 float GetReliableCurrentTime()
 {
 #ifdef CLIENT_DLL
-	return gpGlobals->curtime;
-	//return Plat_FloatTime();
+	return Plat_FloatTime();
 #else
 	return gpGlobals->curtime;
 #endif

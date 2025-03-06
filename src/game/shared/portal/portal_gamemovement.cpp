@@ -97,17 +97,22 @@ public:
 
 	virtual bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 	{
-#if defined ( CLIENT_DLL ) && 0
+		// The best solution right now is to make held objects no collide for players to reduce prediction errors
 		CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
 		if ( pEntity )
 		{
-			IPhysicsObject *pObj = pEntity->VPhysicsGetObject(); // If it's held, don't collide
-			if ( pObj && (pObj->GetGameFlags() & FVPHYSICS_PLAYER_HELD) )
+#if defined ( CLIENT_DLL )
+			CBasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
+			if ( pLocalPlayer )
 			{
-				return false;
+				CBaseEntity *pHeld = GetPlayerHeldEntity( pLocalPlayer );
+				if ( pHeld && (pHeld == pEntity) )
+				{
+					return false;
+				}
 			}
-		}
 #endif
+		}
 		return CTraceFilterSimple::ShouldHitEntity( pHandleEntity, contentsMask );
 	}
 };

@@ -42,8 +42,6 @@ private:
 	Vector	m_ptDeathPoint;
 	Vector	m_ptAimPoint;
 
-	bool	m_bCreatedByPrediction;
-
 	float	m_fCreationTime;
 	float	m_fDeathTime;
 
@@ -75,10 +73,7 @@ void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedByType ePlacedBy, const V
 
 	SetAbsOrigin( m_ptCreationPoint );
 	
-	m_fCreationTime = GetReliableCurrentTime();
-
-	if ( ePlacedBy != PORTAL_PLACED_BY_PLAYER )
-		m_fCreationTime = gpGlobals->curtime;
+	m_fCreationTime = gpGlobals->curtime;
 
 	m_fDeathTime = fDeathTime;
 
@@ -102,8 +97,6 @@ void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedByType ePlacedBy, const V
 	Msg("vForward: %f %f %f\n", vForward.x, vForward.y, vForward.z);
 	Msg("qAngles: %f %f %f\n", qAngles[0], qAngles[1], qAngles[2]);
 #endif
-
-	m_bCreatedByPrediction = prediction->InPrediction();
 
 	C_BasePlayer *pPlayer = ToBasePlayer(hEntity.Get());
 
@@ -170,12 +163,7 @@ void C_PortalBlast::ClientThink( void )
 		return;
 	}
 	
-	float flTime = GetReliableCurrentTime();
-	
-	if ( m_ePlacedBy != PORTAL_PLACED_BY_PLAYER )
-		flTime = gpGlobals->curtime;
-
-	float fT = ( flTime - m_fCreationTime ) / ( m_fDeathTime - m_fCreationTime );
+	float fT = ( gpGlobals->curtime - m_fCreationTime ) / ( m_fDeathTime - m_fCreationTime );
 
 	if ( fT >= 1.0f )
 	{
