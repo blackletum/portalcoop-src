@@ -22,7 +22,7 @@
 #include "weapon_portalbasecombatweapon.h"
 #include "vphysics/friction.h"
 #include "saverestore_utlvector.h"
-#include "hl2_gamerules.h"
+#include "portal_gamerules.h"
 #include "citadel_effects_shared.h"
 #include "model_types.h"
 #include "rumble_shared.h"
@@ -1873,7 +1873,7 @@ enum
 //-----------------------------------------------------------------------------
 bool PlayerHasMegaPhysCannon()
 {
-	return ( HL2GameRules()->MegaPhyscannonActive() == true );
+	return ( PortalGameRules()->MegaPhyscannonActive() == true );
 }
 
 
@@ -3176,7 +3176,7 @@ bool CGrabController::UpdateObject( CBasePlayer *pPlayer, float flError )
 	}
 	AngleVectors( playerAngles, &forward, &right, &up );
 #ifdef GAME_DLL
-	if ( HL2GameRules()->MegaPhyscannonActive() )
+	if ( PortalGameRules()->MegaPhyscannonActive() )
 	{
 		Vector los = ( pEntity->WorldSpaceCenter() - pPlayer->Weapon_ShootPosition() );
 		VectorNormalize( los );
