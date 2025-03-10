@@ -1062,9 +1062,13 @@ void CNPC_SecurityCamera::InputRagdoll( inputdata_t &inputdata )
 
 	pPhysics->EnableMotion( true );
 	pPhysics->Wake();
-
-	if ( !m_bSuppressDestroyedScenes )
-		PlayDismountSounds();
+	
+	// This check doesn't seem necessary if the SuppressDestroyedScenes keyvalue exists.
+	//if ( sv_portal_game.GetInt() == PORTAL_GAME_PORTAL )
+	{
+		if ( !m_bSuppressDestroyedScenes )
+			PlayDismountSounds();
+	}
 }
 
 //-----------------------------------------------------------------------------

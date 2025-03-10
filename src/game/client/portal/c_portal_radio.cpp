@@ -302,7 +302,7 @@ void C_Portal_Dinosaur::ScanForSounds()
 		if ( event )
 		{
 			event->SetInt( "id", id );
-			gameeventmanager->FireEvent( event );
+			gameeventmanager->FireEventClientSide( event );
 		}
 	}
 

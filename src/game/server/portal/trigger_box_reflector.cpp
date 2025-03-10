@@ -246,7 +246,7 @@ void CTriggerBoxReflector::DetachBox( CPropBox *pAttachedBox, bool bPush /*= fal
 	SetContextThink( NULL, 0, g_pszBeamUpdateThink );
 }
 
-void CTriggerBoxReflector::EnergyBallHit( CBaseEntity *pBall )
+void CTriggerBoxReflector::EnergyBallHit( CPropCombineBall *pBall )
 {
 	EmitSound( "Rexaura.Ball_Force_Explosion" );
 	m_OnEnergyBallHit.FireOutput( pBall, pBall );

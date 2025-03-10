@@ -48,7 +48,7 @@ void CPropBox::Precache( void )
 	PrecacheScriptSound( "Rexaura.BoxDissolve" );
 }
 
-void CPropBox::EnergyBallHit( CBaseEntity *pBall )
+void CPropBox::EnergyBallHit( CPropCombineBall *pBall )
 {
 	CTriggerBoxReflector *pAttached = m_hAttached;
 	if ( pAttached )

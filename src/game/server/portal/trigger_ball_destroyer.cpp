@@ -123,7 +123,7 @@ void CTriggerBallDestroyer::StartTouch( CBaseEntity *pOther )
 	{
 		EmitSound( "Rexaura.Ball_Force_Explosion" );
 		m_OnExplodeBall.FireOutput( pOther, pOther );
-		pBall->ExplodeThink(); // Pretty bad but it will do
+		pBall->DoExplodeThink();
 	}
 
 	if ( m_bEnergyBallsOnly )

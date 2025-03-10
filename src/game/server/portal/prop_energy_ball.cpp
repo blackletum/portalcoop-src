@@ -37,6 +37,7 @@ public:
 	virtual void VPhysicsCollision( int index, gamevcollisionevent_t *pEvent );
 	// Overload for less sound, no shake.
 	virtual void ExplodeThink( void );
+	virtual void DoExplodeThink( void );
 	// Update in a time till death update
 	virtual void Think ( void );
 	virtual void EndTouch( CBaseEntity *pOther );
@@ -419,6 +420,11 @@ void CPropEnergyBall::ExplodeThink( )
 
 	SetContextThink( &CPropCombineBall::SUB_Remove, gpGlobals->curtime + 0.5f, "RemoveContext" );
 	StopLoopingSounds();
+}
+
+void CPropEnergyBall::DoExplodeThink( void )
+{
+	SetContextThink( &CPropCombineBall::ExplodeThink, gpGlobals->curtime, "ExplodeTimerContext" );
 }
 
 void CPropEnergyBall::StartTouch( CBaseEntity *pOther )

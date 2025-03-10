@@ -1279,7 +1279,6 @@ public:
 	bool OnControls( CBaseEntity *pControls ) { return true; }
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 #ifdef CLIENT_DLL
-	virtual	void	Simulate();
 	virtual void	OnDataChanged( DataUpdateType_t type );
 	virtual void	OnPreDataChanged( DataUpdateType_t type );
 	virtual void	PreDataUpdate( DataUpdateType_t type );
@@ -1552,25 +1551,6 @@ void CPlayerPickupController::Shutdown( bool bThrown )
 	Remove();
 #endif
 }
-
-#ifdef CLIENT_DLL
-
-void CPlayerPickupController::Simulate( void )
-{
-	BaseClass::Simulate();
-
-#ifdef CLIENT_DLL	
-	CPortal_Player *localplayer = CPortal_Player::GetLocalPlayer();
-
-	if ( localplayer && !localplayer->IsObserver() && m_hPlayer->IsLocalPlayer() )
-		ManagePredictedObject();
-
-	m_grabController.UpdateObject( m_hPlayer, 12 );
-#endif
-
-	//SetNextClientThink( CLIENT_THINK_ALWAYS );
-}
-#endif
 
 
 void CPlayerPickupController::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

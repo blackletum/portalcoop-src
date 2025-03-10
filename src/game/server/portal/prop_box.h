@@ -4,6 +4,7 @@
 #include "props.h"
 
 class CTriggerBoxReflector;
+class CPropCombineBall;
 
 class CPropBox : public CPhysicsProp
 {
@@ -17,7 +18,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 
-	void EnergyBallHit( CBaseEntity *pBall );
+	void EnergyBallHit( CPropCombineBall *pBall );
 	void PreDissolve( CBaseEntity *pActivator, CBaseEntity *pCaller );
 
 	CHandle<CTriggerBoxReflector> m_hAttached;

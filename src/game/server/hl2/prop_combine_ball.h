@@ -47,6 +47,7 @@ public:
 	CFuncCombineBallSpawner *GetSpawner();
 
 	virtual void ExplodeThink( void );
+	virtual void DoExplodeThink( void );
 
 	// Override of IPlayerPickupVPhysics;
 	virtual bool ShouldPuntUseLaunchForces( PhysGunForce_t reason ) { return ( reason == PHYSGUN_FORCE_PUNTED ); }

@@ -2,6 +2,7 @@
 #define TRIGGER_BOX_REFLECTOR_H
 
 class CPropBox;
+class CPropCombineBall;
 
 class CTriggerBoxReflector : public CBaseEntity
 {
@@ -22,7 +23,7 @@ public:
 
 	void DetachBox( CPropBox *pBox, bool bPush = false );
 
-	void EnergyBallHit( CBaseEntity *pBall );
+	void EnergyBallHit( CPropCombineBall *pBall );
 	
 	void SetSpecificBeamBrightness( const char *name, float flBrightness );
 	void SetBeamBrightness( float flBrightness );
