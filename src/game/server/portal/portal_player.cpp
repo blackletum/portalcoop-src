@@ -1290,14 +1290,24 @@ void CPortal_Player::PreThink(void)
 
 	
 	int iPortalColorSet;
-
 	Color color;
-
 	UTIL_Ping_Color( this, color, iPortalColorSet );
 
 	m_flGlowR = color.r() / 255;
 	m_flGlowG = color.g() / 255;
 	m_flGlowB = color.b() / 255;
+	
+	for (int i = 0; i < WeaponCount(); ++i)
+	{					
+		CBaseCombatWeapon *pWeapon = GetWeapon(i);
+
+		if (!pWeapon)
+			continue;
+
+		pWeapon->m_flGlowR = m_flGlowR;
+		pWeapon->m_flGlowG = m_flGlowG;
+		pWeapon->m_flGlowB = m_flGlowB;
+	}
 
 	//Reset bullet force accumulator, only lasts one frame
 	m_vecTotalBulletForce = vec3_origin;

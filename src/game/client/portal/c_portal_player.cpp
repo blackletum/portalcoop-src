@@ -866,68 +866,6 @@ void C_Portal_Player::ClientThink( void )
 {
 	//PortalEyeInterpolation.m_bNeedToUpdateEyePosition = true;
 
-	if (IsLocalPlayer()) // Just in case.
-	{
-		if ( m_afButtonPressed & IN_GLOW_PLAYERS )
-		{
-			for (int i = 1; i <= gpGlobals->maxClients; ++i)
-			{
-				C_Portal_Player *pPlayer = (C_Portal_Player*)UTIL_PlayerByIndex(i);
-
-				if (!pPlayer)
-					continue;
-
-				if (pPlayer->IsLocalPlayer())
-					continue;
-
-							
-				pPlayer->SetClientSideGlowEnabled( true );
-
-				// We also want the player's weapon to glow
-				for (int i = 1; i <= pPlayer->WeaponCount(); ++i)
-				{					
-					C_BaseCombatWeapon *pWeapon = pPlayer->GetWeapon(i);
-
-					if (!pWeapon)
-						continue;
-
-					pWeapon->SetClientSideGlowEnabled( true );
-
-				}
-			}
-
-			EmitSound( ACTIVATE_GLOW_SOUNDSCRIPT );
-		}
-		// Don't do else if
-		if ( m_afButtonReleased & IN_GLOW_PLAYERS )
-		{
-			for (int i = 1; i <= gpGlobals->maxClients; ++i)
-			{
-				C_Portal_Player *pPlayer = (C_Portal_Player*)UTIL_PlayerByIndex(i);
-
-				if (!pPlayer)
-					continue;
-			
-				if (pPlayer->IsLocalPlayer())
-					continue;
-
-				pPlayer->SetClientSideGlowEnabled( false );
-			
-				// Don't forget to turn off the weapon glow!
-				for (int i = 1; i <= pPlayer->WeaponCount(); ++i)
-				{					
-					C_BaseCombatWeapon *pWeapon = pPlayer->GetWeapon(i);
-
-					if (!pWeapon)
-						continue;
-
-					pWeapon->SetClientSideGlowEnabled( false );
-				}
-			}
-		}
-
-	}
-	
 	Vector vForward;
 	AngleVectors( GetLocalAngles(), &vForward );
 
@@ -2972,3 +2910,100 @@ void C_Portal_Player::EnableSprint( bool bEnable )
 
 	m_bSprintEnabled = bEnable;
 }
+
+class CPlayerGlower : public CAutoGameSystemPerFrame
+{
+public:
+	CPlayerGlower()
+	{
+		m_bGlowingPlayers = false;
+	}
+	void PreRender( void ) OVERRIDE;
+	void LevelInitPreEntity( void ) OVERRIDE;
+	void LevelShutdownPostEntity( void ) OVERRIDE;
+
+	bool m_bGlowingPlayers;
+};
+
+CPlayerGlower g_PlayerGlower;
+
+void CPlayerGlower::PreRender( void )
+{
+	if ( m_bGlowingPlayers )
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; ++i)
+		{
+			C_Portal_Player *pPlayer = (C_Portal_Player*)UTIL_PlayerByIndex(i);
+
+			if ( !pPlayer )
+				continue;
+
+			if ( pPlayer->IsLocalPlayer() )
+				continue;
+										
+			pPlayer->SetClientSideGlowEnabled( true );
+
+			// We also want the player's weapon to glow
+			for (int i = 0; i < pPlayer->WeaponCount(); ++i)
+			{					
+				C_BaseCombatWeapon *pWeapon = pPlayer->GetWeapon(i);
+
+				if (!pWeapon)
+					continue;
+
+				pWeapon->SetClientSideGlowEnabled( true );
+			}
+		}
+	}
+	else
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; ++i)
+		{
+			C_Portal_Player *pPlayer = (C_Portal_Player*)UTIL_PlayerByIndex(i);
+
+			if ( !pPlayer )
+				continue;
+			
+			if ( pPlayer->IsLocalPlayer() )
+				continue;
+
+			pPlayer->SetClientSideGlowEnabled( false );
+			
+			// Don't forget to turn off the weapon glow!
+			for (int i = 0; i < pPlayer->WeaponCount(); ++i)
+			{					
+				C_BaseCombatWeapon *pWeapon = pPlayer->GetWeapon(i);
+
+				if (!pWeapon)
+					continue;
+
+				pWeapon->SetClientSideGlowEnabled( false );
+			}
+		}
+	}
+}
+
+void CPlayerGlower::LevelInitPreEntity( void )
+{
+	m_bGlowingPlayers = false;
+}
+
+void CPlayerGlower::LevelShutdownPostEntity( void )
+{
+	m_bGlowingPlayers = false;
+}
+
+void CC_GlowPlayers( const CCommand &args )
+{
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( !pPlayer )
+		return;
+
+	g_PlayerGlower.m_bGlowingPlayers = !g_PlayerGlower.m_bGlowingPlayers;
+
+	//if ( g_PlayerGlower.m_bGlowingPlayers )
+	{
+		pPlayer->EmitSound( ACTIVATE_GLOW_SOUNDSCRIPT );
+	}
+}
+static ConCommand glow_players("glow_players", CC_GlowPlayers, "Glows active players.", FCVAR_CHEAT );
