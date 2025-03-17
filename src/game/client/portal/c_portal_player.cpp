@@ -3006,4 +3006,4 @@ void CC_GlowPlayers( const CCommand &args )
 		pPlayer->EmitSound( ACTIVATE_GLOW_SOUNDSCRIPT );
 	}
 }
-static ConCommand glow_players("glow_players", CC_GlowPlayers, "Glows active players.", FCVAR_CHEAT );
+static ConCommand glow_players("glow_players", CC_GlowPlayers, "Glows active players.", FCVAR_NONE );
