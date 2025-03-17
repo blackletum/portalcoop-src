@@ -364,7 +364,7 @@ void SetupGameInstallBits()
 	}
 
 	// Check to see if Rexaura is mounted
-	pMaterial = materials->FindMaterial( "console/rex_menu", NULL, false );
+	pMaterial = materials->FindMaterial( "vgui/bonusmaps/rex_bonus_04_recycle", NULL, false );
 	if ( pMaterial && !pMaterial->IsErrorMaterial() )
 	{
 		nInstallBits |= INSTALL_BITS_REXAURA;
