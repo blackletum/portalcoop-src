@@ -368,9 +368,6 @@ void CProp_Portal::PlacePortal( const Vector &vOrigin, const QAngle &qAngles, fl
 
 void CProp_Portal::StealPortal( CProp_Portal *pHitPortal )
 {
-	if (!pHitPortal)
-		return;
-
 	CWeaponPortalgun *pPortalGun = (m_hPlacedBy.Get());
 	
 	CBaseEntity *pActivator = this;
@@ -390,25 +387,21 @@ void CProp_Portal::StealPortal( CProp_Portal *pHitPortal )
 
 	if ( pHitPortal && (pHitPortal->GetLinkageGroup() != iLinkageGroupID))
 	{
-		
-#if defined( CLIENT_DLL )
-		if ( ShouldPredict() && prediction->InPrediction() )
-#endif		
-		{
 #ifdef GAME_DLL
-			// HACK!! For some inexplicable reason, if we don't make the caller pHitPortal, the output won't fire.
-			pHitPortal->OnStolen( pActivator, pHitPortal );
+		// HACK!! For some inexplicable reason, if we don't make the caller pHitPortal, the output won't fire.
+		pHitPortal->OnStolen( pActivator, pHitPortal );
 #endif
-			pHitPortal->DoFizzleEffect( PORTAL_FIZZLE_STOLEN, pHitPortal->m_iPortalColorSet, false );
-			pHitPortal->Fizzle();
-			//pHitPortal->SetActive( false );	// HACK: For replacing the portal, we need this!+
+		pHitPortal->DoFizzleEffect( PORTAL_FIZZLE_STOLEN, pHitPortal->m_iPortalColorSet, false );
+#ifndef CLIENT_DLL // It would be nice to handle this on the client too, but if a prediction error occurred, it creates a "ghost" portal which is extremely problematic.
+		pHitPortal->Fizzle();
+#endif
+		//pHitPortal->SetActive( false );	// HACK: For replacing the portal, we need this!+
 
 #ifdef GAME_DLL
-			pHitPortal->PunchAllPenetratingPlayers();
+		pHitPortal->PunchAllPenetratingPlayers();
 #endif
-			//m_pHitPortal->m_pPortalReplacingMe = NULL;
-			//m_pHitPortal = NULL;
-		}
+		//m_pHitPortal->m_pPortalReplacingMe = NULL;
+		//m_pHitPortal = NULL;
 	}
 }
 
