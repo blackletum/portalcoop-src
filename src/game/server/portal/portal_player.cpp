@@ -1041,8 +1041,9 @@ void CPortal_Player::PlayCoopPingEffect( void )
 		
 		if (pAnimating)
 		{
-			if (PingChildrenOfChildParent(pAnimating, vColor))
+			if ( pAnimating->GetParent() )
 			{
+				PingChildrenOfEntity( pAnimating->GetParent(), vColor, bShouldCreateCrosshair );
 				EmitSound( COOP_PING_SOUNDSCRIPT_NAME );
 				return;
 			}
@@ -1078,7 +1079,7 @@ void CPortal_Player::PlayCoopPingEffect( void )
 		}
 		else if ( !pAnimating && !pPortal )
 		{
-			bShouldCreateCrosshair = PingChildrenOfEntity( tr, vColor, bShouldCreateCrosshair );
+			PingChildrenOfEntity( tr.m_pEnt, vColor, bShouldCreateCrosshair );
 		}
 
 		if (bShouldCreateCrosshair)
@@ -1104,71 +1105,12 @@ void CPortal_Player::PlayCoopPingEffect( void )
 	FirePlayerProxyOutput( "OnCoopPing", variant_t(), this, this );
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Ping all of my siblings
-// TODO: Does this need to be a member function?
-//-----------------------------------------------------------------------------
-bool CPortal_Player::PingChildrenOfChildParent( CBaseAnimating *pAnimating, Vector vColor )
+void CPortal_Player::PingChildrenOfEntity( CBaseEntity *pEntity, Vector vColor, bool &bShouldCreateCrosshair )
 {
-	if (!pAnimating)
-		return false;
-	if (!pAnimating->GetParent())
-		return false;
-	
-	bool bResult = false;
-
-	CBaseEntity *pParent = pAnimating->GetParent();
-
-	CBaseDoor *pDoor = dynamic_cast<CBaseDoor *>( pParent );
-	CFuncTrackTrain *pTrain = dynamic_cast<CFuncTrackTrain*>( pParent );
-	if ( !pDoor && !pTrain )
-		return false;
-	
-	CUtlVector<CBaseEntity *> children;
-	GetAllChildren( pParent, children );
-	for (int i = 0; i < children.Count(); i++ )
-	{
-		CBaseEntity *pEnt = children.Element( i );
-
-		if (!pEnt)
-			continue;
-
-		CBaseAnimating *pChild = pEnt->GetBaseAnimating();
-			
-		if ( pChild )
-		{
-			if (pChild->m_bGlowEnabled)
-			{
-				pChild->RemoveGlowEffect();
-				m_bGlowEnabled.Set(false);
-			}
-
-			pChild->SetGlowEffectColor(vColor.x, vColor.y, vColor.z);
-			pChild->AddGlowTime(gpGlobals->curtime);
-			pChild->RemoveGlowTime(PINGTIME);
-			bResult = true;
-		}
-	}
-
-	if (bResult)
-	{
-		ShowAnnotation( pParent->GetAbsOrigin(), pParent->entindex(), entindex() );
-	}
-
-	return bResult;
-}
-
-bool CPortal_Player::PingChildrenOfEntity( trace_t &tr, Vector vColor, bool bShouldCreateCrosshair )
-{
-	bool bTempShouldCreateCrosshair = bShouldCreateCrosshair;
-
-	CBaseEntity *pEntity = tr.m_pEnt;
-	if ( !pEntity )
-		return bShouldCreateCrosshair;
 	CBaseDoor *pDoor = dynamic_cast<CBaseDoor*>( pEntity );
 	CFuncTrackTrain *pTrain = dynamic_cast<CFuncTrackTrain*>( pEntity );
 	if ( !pDoor && !pTrain )
-		return bShouldCreateCrosshair;
+		return;
 		
 	CBaseAnimating *pChild = NULL;
 	CBaseAnimating *pChildForLinker = NULL;
@@ -1203,7 +1145,7 @@ bool CPortal_Player::PingChildrenOfEntity( trace_t &tr, Vector vColor, bool bSho
 			pChild->SetGlowEffectColor(vColor.x, vColor.y, vColor.z);
 			pChild->AddGlowTime(gpGlobals->curtime);
 			pChild->RemoveGlowTime(PINGTIME);
-			bTempShouldCreateCrosshair = false;
+			bShouldCreateCrosshair = false;
 		}
 	}
 
@@ -1234,9 +1176,6 @@ bool CPortal_Player::PingChildrenOfEntity( trace_t &tr, Vector vColor, bool bSho
 	{
 		ShowAnnotation( pEntity->GetAbsOrigin(), pEntity->entindex(), entindex() );
 	}
-
-	return bTempShouldCreateCrosshair;
-
 }
 
 void CPortal_Player::PreThink(void)

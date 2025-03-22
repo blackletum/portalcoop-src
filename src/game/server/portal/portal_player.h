@@ -325,8 +325,7 @@ public:
 	
 	// Coop ping effect
 	void	PlayCoopPingEffect( void );
-	bool	PingChildrenOfChildParent( CBaseAnimating *pAnimating, Vector vColor );
-	bool	PingChildrenOfEntity( trace_t &tr, Vector vColor, bool bShouldCreateCrosshair );
+	void	PingChildrenOfEntity( CBaseEntity *pEntity, Vector vColor, bool &bShouldCreateCrosshair );
 
 	friend class CProp_Portal;
 	
