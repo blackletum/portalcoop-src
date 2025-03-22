@@ -991,52 +991,21 @@ void CPortal_Player::PlayCoopPingEffect( void )
 		angNormal.x += 90.0f;
 		
 		CDisablePredictionFiltering filter(true);
-		//DispatchParticleEffect( COOP_PING_PARTICLE_NAME, tr.endpos, vec3_angle );
 		
 		// Get our ping color information
 		Vector vColor;
 		int iPortalColorSet;
-
 		UTIL_Ping_Color( this, vColor, iPortalColorSet );
 
-
+		// Test if the trace hit the portal
 		Ray_t ray;
 		ray.Init( tr.startpos, tr.endpos );
-
 		float flMustBeCloserThan = 2.0f;
-
 		CProp_Portal *pPortal = UTIL_Portal_FirstAlongRayAll( ray , flMustBeCloserThan );
 		
-		CBaseAnimating *pAnimating = NULL;
-		
-		if ( tr.m_pEnt )
-			pAnimating = tr.m_pEnt->GetBaseAnimating();
+		// Get the base animating
+		CBaseAnimating *pAnimating = tr.m_pEnt ? tr.m_pEnt->GetBaseAnimating() : NULL;
 
-		const char* pszAnimatingName = NULL;
-		
-		if (pAnimating)
-			pszAnimatingName = pAnimating->GetClassname();
-
-		CPointPingLinker *pPingLinker = NULL;
-
-		//Find a ping linker to use
-		CBaseEntity *pEntityTemp = NULL;
-		while ( ( pEntityTemp = gEntList.FindEntityByClassname( pEntityTemp, "point_ping_linker" ) ) != NULL )
-		{
-			pPingLinker = dynamic_cast<CPointPingLinker*>( pEntityTemp );
-			if ( !pPingLinker )
-				continue;
-
-			if ( pPingLinker->HasThisEntity( pAnimating ) )
-			{
-				break;
-			}
-			else
-			{
-				pPingLinker = NULL;
-			}
-		}
-		
 		bool bShouldCreateCrosshair = true;
 		
 		if (pAnimating)
@@ -1048,7 +1017,26 @@ void CPortal_Player::PlayCoopPingEffect( void )
 				return;
 			}
 
-			if (pPingLinker)
+			CPointPingLinker *pPingLinker = NULL;
+			//Find a ping linker to use
+			CBaseEntity *pEntityTemp = NULL;
+			while ( ( pEntityTemp = gEntList.FindEntityByClassname( pEntityTemp, "point_ping_linker" ) ) != NULL )
+			{
+				pPingLinker = dynamic_cast<CPointPingLinker*>( pEntityTemp );
+				if ( !pPingLinker )
+					continue;
+
+				if ( pPingLinker->HasThisEntity( pAnimating ) )
+				{
+					break;
+				}
+				else
+				{
+					pPingLinker = NULL;
+				}
+			}
+
+			if ( pPingLinker )
 			{
 				pPingLinker->PingLinkedEntities( PINGTIME, vColor, this, COOP_PING_HUD_SOUNDSCRIPT_NAME );
 			}
@@ -1063,11 +1051,7 @@ void CPortal_Player::PlayCoopPingEffect( void )
 				pAnimating->AddGlowTime(gpGlobals->curtime);
 				pAnimating->RemoveGlowTime(PINGTIME);
 
-				
-				//if (bResult)
-				{
-					ShowAnnotation( pAnimating->GetAbsOrigin(), pAnimating->entindex(), entindex() );
-				}
+				ShowAnnotation( pAnimating->GetAbsOrigin(), pAnimating->entindex(), entindex() );
 			}
 
 			bShouldCreateCrosshair = false;
@@ -1098,7 +1082,6 @@ void CPortal_Player::PlayCoopPingEffect( void )
 
 		EmitSound( COOP_PING_SOUNDSCRIPT_NAME );
 	//	UTIL_DecalTrace( &tr, "Portal2.CoopPingDecal" );
-
 	}
 
 	// Note this in the player proxy
