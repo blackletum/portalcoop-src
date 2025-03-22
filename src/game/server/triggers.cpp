@@ -4631,6 +4631,7 @@ void CTriggerPlayerMovement::StartTouch( CBaseEntity *pOther )
 
 	if ( HasSpawnFlags( SF_TRIGGER_AUTO_DUCK ) )
 	{
+		pPlayer->m_bForceDuckedByTriggerPlayerMove = true;
 		pPlayer->ForceButtons( IN_DUCK );
 	}
 
@@ -4658,6 +4659,7 @@ void CTriggerPlayerMovement::EndTouch( CBaseEntity *pOther )
 	
 	if ( HasSpawnFlags( SF_TRIGGER_AUTO_DUCK ) )
 	{
+		pPlayer->m_bForceDuckedByTriggerPlayerMove = false;
 		pPlayer->UnforceButtons( IN_DUCK );
 	}
 

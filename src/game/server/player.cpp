@@ -277,6 +277,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_flVehicleViewFOV, FIELD_FLOAT ),
 
 	//DEFINE_FIELD( m_fOnTarget, FIELD_BOOLEAN ), // Don't need to restore
+	DEFINE_FIELD( m_bForceDuckedByTriggerPlayerMove, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iObserverMode, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iObserverLastMode, FIELD_INTEGER ),
 	DEFINE_FIELD( m_hObserverTarget, FIELD_EHANDLE ),
@@ -5022,6 +5023,8 @@ void CBasePlayer::Spawn( void )
 	UpdateLastKnownArea();
 
 	m_weaponFiredTimer.Invalidate();
+
+	m_bForceDuckedByTriggerPlayerMove = false;
 }
 
 void CBasePlayer::Activate( void )

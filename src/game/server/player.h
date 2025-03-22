@@ -864,6 +864,8 @@ public:
 
 	CNetworkVar( bool, m_fOnTarget );		//Is the crosshair on a target?
 
+	CNetworkVar( bool, m_bForceDuckedByTriggerPlayerMove );
+
 	char					m_szAnimExtension[32];
 
 	int						m_nUpdateRate;		// user snapshot rate cl_updaterate
