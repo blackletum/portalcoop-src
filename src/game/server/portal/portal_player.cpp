@@ -996,12 +996,6 @@ void CPortal_Player::PlayCoopPingEffect( void )
 		Vector vColor;
 		int iPortalColorSet;
 		UTIL_Ping_Color( this, vColor, iPortalColorSet );
-
-		// Test if the trace hit the portal
-		Ray_t ray;
-		ray.Init( tr.startpos, tr.endpos );
-		float flMustBeCloserThan = 2.0f;
-		CProp_Portal *pPortal = UTIL_Portal_FirstAlongRayAll( ray , flMustBeCloserThan );
 		
 		// Get the base animating
 		CBaseAnimating *pAnimating = tr.m_pEnt ? tr.m_pEnt->GetBaseAnimating() : NULL;
@@ -1056,14 +1050,22 @@ void CPortal_Player::PlayCoopPingEffect( void )
 
 			bShouldCreateCrosshair = false;
 		}
-		else if ( !pAnimating && pPortal )
+		else
 		{
-			ShowAnnotation( pPortal->GetAbsOrigin(), pPortal->entindex(), entindex() );			
-			bShouldCreateCrosshair = false;
-		}
-		else if ( !pAnimating && !pPortal )
-		{
-			PingChildrenOfEntity( tr.m_pEnt, vColor, bShouldCreateCrosshair );
+			// Test if the trace hit a portal
+			Ray_t ray;
+			ray.Init( tr.startpos, tr.endpos );
+			float flMustBeCloserThan = 2.0f;
+			CProp_Portal *pPortal = UTIL_Portal_FirstAlongRayAll( ray , flMustBeCloserThan );
+			if ( pPortal )
+			{
+				ShowAnnotation( pPortal->GetAbsOrigin(), pPortal->entindex(), entindex() );			
+				bShouldCreateCrosshair = false;
+			}
+			else
+			{
+				PingChildrenOfEntity( tr.m_pEnt, vColor, bShouldCreateCrosshair );
+			}
 		}
 
 		if (bShouldCreateCrosshair)
