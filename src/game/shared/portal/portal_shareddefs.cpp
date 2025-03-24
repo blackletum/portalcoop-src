@@ -53,7 +53,7 @@ int GetRequiredPlayers()
 		}
 		else
 		{
-			Warning( "Map didn't have required players set, using maxplayers\n" );
+			//Warning( "Map didn't have required players set, using maxplayers\n" );
 			// Just use maxclients if it fails to load
 			nRequiredPlayers = gpGlobals->maxClients;
 		}
@@ -63,7 +63,7 @@ int GetRequiredPlayers()
 		nRequiredPlayers = pcoop_require_all_players_force_amount.GetInt();
 	}
 
-	Msg("nRequiredPlayers: %i\n", nRequiredPlayers);
+	//Msg("nRequiredPlayers: %i\n", nRequiredPlayers);
 	return nRequiredPlayers;
 }
 
