@@ -49,6 +49,7 @@ ConVar sv_restart_server_include_bots( "sv_restart_server_include_bots", "0", FC
 
 ConVar sv_allow_customized_portal_colors("sv_allow_customized_portal_colors", "0", FCVAR_REPLICATED, "Sets if clients can choose their own portal color.");
 
+ConVar pcoop_paused( "pcoop_paused", "0", FCVAR_REPLICATED | FCVAR_HIDDEN );
 
 REGISTER_GAMERULES_CLASS( CPortalGameRules );
 
@@ -79,7 +80,7 @@ BEGIN_DATADESC( CPortalGameRulesProxy )
 DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SuspendRespawning", InputSuspendRespawning ),
 DEFINE_INPUTFUNC( FIELD_VOID, "RespawnAllPlayers", InputRespawnAllPlayers ),
 DEFINE_INPUTFUNC( FIELD_VOID, "ResetDetachedCameras", InputResetDetachedCameras ),
-//DEFINE_INPUTFUNC( FIELD_BOOLEAN, "DisableGamePause", InputDisableGamePause ),
+DEFINE_INPUTFUNC( FIELD_BOOLEAN, "DisableGamePause", InputDisableGamePause ),
 
 DEFINE_OUTPUT( m_OnPlayerConnected, "OnPlayerConnected" ),
 END_DATADESC()
@@ -112,10 +113,10 @@ void CPortalGameRulesProxy::InputResetDetachedCameras( inputdata_t &inputdata )
 	g_iNumCamerasDetatched = 0;
 }
 
-//void CPortalGameRulesProxy::InputDisableGamePause( inputdata_t &inputdata )
-//{
-//	PortalGameRules()->m_bDisableGamePause = inputdata.value.Bool();
-//}
+void CPortalGameRulesProxy::InputDisableGamePause( inputdata_t &inputdata )
+{
+	PortalGameRules()->m_bDisableGamePause = inputdata.value.Bool();
+}
 #endif
 
 #ifdef CLIENT_DLL
@@ -457,6 +458,11 @@ const char *CPortalGameRules::GetGameDescription( void )
 		m_flPreStartTime = 0.0f;
 
 		g_pCVar->FindVar( "sv_maxreplay" )->SetValue( "1.5" );
+#ifdef GAME_DLL
+		m_iPlayingPlayers = 0;
+		m_bInRestore = false;
+		m_bDisableGamePause = false;
+#endif
 	}
 
 
@@ -1511,56 +1517,6 @@ const char *CPortalGameRules::GetGameDescription( void )
 
 	}
 	
-#ifdef GAME_DLL
-	//=========================================================
-	//=========================================================
-	void CPortalGameRules::ClientDisconnected( edict_t *pClient )
-	{
-		if ( pClient )
-		{
-			CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
-
-			if ( pPlayer )
-			{
-				FireTargets( "game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0 );
-
-				pPlayer->RemoveAllItems( true );// destroy all of the players weapons and items
-
-				// Kill off view model entities
-				pPlayer->DestroyViewModels();
-
-				pPlayer->SetConnected( PlayerDisconnected );
-			}
-
-			if ( sv_restart_server.GetBool() )
-			{
-				int iConnectedPlayers = 0;
-
-				for ( int i = 1; i <= gpGlobals->maxClients; ++i )
-				{
-					CBasePlayer *pConnectedPlayer = UTIL_PlayerByIndex( i );
-
-					if ( !pConnectedPlayer )
-						continue;
-
-					if ( pConnectedPlayer->IsBot() && !sv_restart_server_include_bots.GetBool() )
-						continue;
-
-					++iConnectedPlayers;
-
-				}
-
-				// We actually have to subtract this value by 1
-				--iConnectedPlayers;
-			
-				if ( iConnectedPlayers == 0 )
-				{
-					engine->ChangeLevel( sv_restart_server_map.GetString(), NULL );
-				}
-			}
-		}
-	}
-#endif
 	//-----------------------------------------------------------------------------
 	// Purpose: Returns how much damage the given ammo type should do to the victim
 	//			when fired by the attacker.
@@ -1743,6 +1699,137 @@ void CPortalGameRules::LevelShutdown( void )
 	ResetThisLevelStats();
 }
 
+extern void SavePortalPlayerData( CPortal_Player *pPlayer );
+extern void RestorePortalPlayerData( CPortal_Player *pPlayer );
+
+void CPortalGameRules::ClientActive( CPortal_Player *pPlayer )
+{
+	if ( PlayerShouldPlay( pPlayer->entindex() ) )
+		++m_iPlayingPlayers;
+
+	CPortalGameRulesProxy *ent = NULL;
+	while ( ( ent = static_cast<CPortalGameRulesProxy*>( gEntList.FindEntityByClassname( ent, "portal_gamerules" ) ) ) != NULL )
+	{
+		ent->m_OnPlayerConnected.FireOutput( pPlayer, pPlayer );
+	}
+	CheckShouldPause();
+
+	m_bInRestore = true;
+	RestorePortalPlayerData( pPlayer );
+	m_bInRestore = false;
+}
+
+void CPortalGameRules::ClientDisconnected( edict_t *pClient )
+{
+	Assert( pClient );
+	
+	CPortal_Player *pPlayer = assert_cast<CPortal_Player*>( CBaseEntity::Instance( pClient ) );
+
+	if ( pPlayer )
+	{
+		FireTargets( "game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0 );
+
+		pPlayer->RemoveAllItems( true );// destroy all of the players weapons and items
+
+		// Kill off view model entities
+		pPlayer->DestroyViewModels();
+
+		pPlayer->SetConnected( PlayerDisconnected );
+	}
+
+	if ( sv_restart_server.GetBool() )
+	{
+		int iConnectedPlayers = 0;
+
+		for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CBasePlayer *pConnectedPlayer = UTIL_PlayerByIndex( i );
+
+			if ( !pConnectedPlayer )
+				continue;
+
+			if ( pConnectedPlayer->IsBot() && !sv_restart_server_include_bots.GetBool() )
+				continue;
+
+			++iConnectedPlayers;
+
+		}
+
+		// We actually have to subtract this value by 1
+		--iConnectedPlayers;
+			
+		if ( iConnectedPlayers == 0 )
+		{
+			engine->ChangeLevel( sv_restart_server_map.GetString(), NULL );
+		}
+	}
+
+	if ( pPlayer && PlayerShouldPlay( pPlayer->entindex() ) )
+	{
+		--m_iPlayingPlayers;
+	}
+	else
+	{
+		Warning("Client disconnected, but pointer is null or isn't connected!\n");
+		Assert( false );
+	}
+
+	CheckShouldPause();
+	
+	SavePortalPlayerData( pPlayer );
+
+	BaseClass::ClientDisconnected( pClient );
+}
+
+void CPortalGameRules::CheckShouldPause( void )
+{
+	int nRequiredPlayers = GetRequiredPlayers();
+	bool bShouldFreeze = pcoop_require_all_players.GetBool() && m_iPlayingPlayers < nRequiredPlayers && !m_bDisableGamePause;
+	if ( bShouldFreeze )
+	{
+		if ( !pcoop_paused.GetBool() )
+		{
+			for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+			{
+				CPortal_Player *pPlayer = GetPortalPlayer( i );
+				if ( !pPlayer )
+					continue;
+
+				pPlayer->LockPlayerInPlace();
+				color32_s color;
+				color.r = 0;
+				color.g = 0;
+				color.b = 0;
+				color.a = 255;
+				UTIL_ScreenFadeAll( color, 0.0, 0, FFADE_OUT | FFADE_PURGE | FFADE_STAYOUT );
+			}
+			pcoop_paused.SetValue( true );
+		}
+	}
+	else
+	{
+		if ( pcoop_paused.GetBool() )
+		{
+			for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+			{
+				CPortal_Player *pPlayer = GetPortalPlayer( i );
+				if ( !pPlayer )
+					continue;
+
+				pPlayer->UnlockPlayer();
+				
+				color32_s color;
+				color.r = 0;
+				color.g = 0;
+				color.b = 0;
+				color.a = 0;
+				UTIL_ScreenFadeAll( color, 1, 0, FFADE_IN | FFADE_PURGE | FFADE_STAYOUT );
+			}
+			pcoop_paused.SetValue( false );			
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------
 // This takes the long way around to see if a prop should emit a DLIGHT when it
 // ignites, to avoid having Alyx-related code in props.cpp.
@@ -1863,6 +1950,11 @@ bool CPortalGameRules::IsBonusChallengeTimeBased( void )
 }
 
 #endif
+
+bool CPortalGameRules::ShouldPauseGame( void )
+{
+	return pcoop_paused.GetBool();
+}
 
 // ------------------------------------------------------------------------------------ //
 // Global functions.

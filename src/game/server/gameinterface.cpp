@@ -125,6 +125,7 @@ extern ConVar tf_mm_servermode;
 #include "prop_portal_shared.h"
 #include "portal_player.h"
 #include "portal_shareddefs.h"
+#include "portal_gamerules.h"
 #endif
 
 #if defined( REPLAY_ENABLED )
@@ -1269,6 +1270,22 @@ void CServerGameDLL::GameFrame( bool simulating )
 		// If we're skipping frames, then the frametime is 2x the normal tick
 		gpGlobals->frametime *= 2.0f;
 	}
+	
+
+	bool bSimulateEntities = true;
+#ifdef PORTAL
+	if ( PortalGameRules() )
+	{
+		if ( PortalGameRules()->ShouldPauseGame() &&
+			gpGlobals->curtime != 0 // Simulate once so entities can load
+			)
+		{
+			bSimulateEntities = false;
+		}
+	}
+#endif
+
+	bSimulateEntities = true;
 
 	float oldframetime = gpGlobals->frametime;
 
@@ -1285,8 +1302,11 @@ void CServerGameDLL::GameFrame( bool simulating )
 	//  outside of server frameloop (e.g., in response to concommand)
 	gEntList.CleanupDeleteList();
 
-	IGameSystem::FrameUpdatePreEntityThinkAllSystems();
-	GameStartFrame();
+	if ( bSimulateEntities )
+	{
+		IGameSystem::FrameUpdatePreEntityThinkAllSystems();
+		GameStartFrame();
+	}
 
 #ifndef _XBOX
 #ifdef USE_NAV_MESH
@@ -1303,10 +1323,23 @@ void CServerGameDLL::GameFrame( bool simulating )
 	UpdateQueryCache();
 	g_pServerBenchmark->UpdateBenchmark();
 
-	Physics_RunThinkFunctions( simulating );
+	if ( bSimulateEntities )
+	{
+		Physics_RunThinkFunctions( simulating );
+		IGameSystem::FrameUpdatePostEntityThinkAllSystems();
+	}
+	else
+	{
+		for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+			if ( !pPlayer )
+				continue;
+			pPlayer->RunNullCommand();
+			pPlayer->RemoveAllCommandContexts();
+		}
+	}
 	
-	IGameSystem::FrameUpdatePostEntityThinkAllSystems();
-
 	// UNDONE: Make these systems IGameSystems and move these calls into FrameUpdatePostEntityThink()
 	// service event queue, firing off any actions whos time has come
 	ServiceEventQueue();
