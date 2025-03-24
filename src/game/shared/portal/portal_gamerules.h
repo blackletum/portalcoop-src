@@ -56,6 +56,8 @@ public:
 	void InputRespawnAllPlayers( inputdata_t &inputdata );
 	void InputResetDetachedCameras( inputdata_t &inputdata );
 	void InputDisableGamePause( inputdata_t &inputdata );
+	void InputDisablePlayerRestore( inputdata_t &inputdata );
+	void InputPurgePlayerRestoreData( inputdata_t &inputdata );
 	
 	bool m_bSuspendRespawn;
 
@@ -174,6 +176,7 @@ public:
 	unsigned char m_iPlayingPlayers; // The amount of players who are actually playing (not spectators)
 	bool m_bInRestore;
 	bool m_bDisableGamePause;
+	bool m_bDisablePlayerRestore;
 #endif
 };
 

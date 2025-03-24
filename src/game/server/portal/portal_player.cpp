@@ -549,6 +549,9 @@ void SavePortalPlayerData( CPortal_Player *pPlayer )
 	if ( !pcoop_restore_players.GetBool() )
 		return;
 	
+	if ( PortalGameRules()->m_bDisablePlayerRestore )
+		return;
+	
 	if ( !pPlayer->IsAlive() ) // No need to save if we're dead
 		return;
 
@@ -622,7 +625,11 @@ void RestorePortalPlayerData( CPortal_Player *pPlayer )
 	if ( !data->m_bNeedsRestore )
 		return;
 
-	data->m_bNeedsRestore = false;
+	data->m_bNeedsRestore = false;	
+
+	// Ensure m_bNeedsRestore is set to false before returning
+	if ( PortalGameRules()->m_bDisablePlayerRestore )
+		return;
 
 	pPlayer->SetAbsOrigin( data->m_vecOrigin );
 	pPlayer->SetAbsVelocity( data->m_vecVelocity );
