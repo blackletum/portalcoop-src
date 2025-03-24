@@ -1669,6 +1669,13 @@ bool CPortalGameRules::ClientConnected( edict_t *pEntity, const char *pszName, c
 	return BaseClass::ClientConnected( pEntity, pszName, pszAddress, reject, maxrejectlen );
 }
 
+extern void ResetPortalPlayerData( void );
+void CPortalGameRules::LevelInitPreEntity( void )
+{
+	m_bDisableGamePause = false;
+	ResetPortalPlayerData();
+}
+
 //---------------------------------------------------------
 //---------------------------------------------------------
 bool CPortalGameRules::ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target )

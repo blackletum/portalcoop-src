@@ -34,14 +34,12 @@ using namespace vgui;
 // Purpose: 
 //-----------------------------------------------------------------------------
 CWaitingForPlayersText::CWaitingForPlayersText( const char *pElementName ) :
-	CHudElement( pElementName ), BaseClass( NULL, "TargetID" )
+	CHudElement( pElementName ), BaseClass( NULL, "WaitingForPlayersText" )
 {
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
 
 	m_hFont = g_hFontTrebuchet24;
-
-	SetHiddenBits( HIDEHUD_MISCSTATUS );
 }
 
 bool CWaitingForPlayersText::ShouldDraw( void )
@@ -92,19 +90,20 @@ void CWaitingForPlayersText::Paint()
 		ypos = YRES(260);
 		xpos = XRES(250);
 	}
+
 	wchar_t wszFinalText[64];
 	g_pVGuiLocalize->ConstructString( wszFinalText, sizeof(wszFinalText), g_pVGuiLocalize->Find(printFormatString), 0 );
 
 	if ( wszFinalText[0] )
 	{
 		int wide, tall;
-
 		vgui::surface()->GetTextSize( m_hFont, wszFinalText, wide, tall );
 					
 		vgui::surface()->DrawSetTextFont( m_hFont );
 		vgui::surface()->DrawSetTextPos( xpos, ypos );
 		
-	Color c = Color( 255, 160, 32, 255 );
+		Color c = Color( 255, 160, 32, 255 );
+
 		vgui::surface()->DrawSetTextColor( c );
 		vgui::surface()->DrawPrintText( wszFinalText, wcslen(wszFinalText) );
 	}

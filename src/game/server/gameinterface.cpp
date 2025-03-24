@@ -1002,9 +1002,10 @@ void UpdatePortalGameType( const char *pMapName )
 		sv_portal_game.SetValue( PORTAL_GAME_PORTAL );
 	}
 }
-
 #endif
-
+#ifdef PORTAL
+bool g_bFirstFrameSimulated = false;
+#endif
 // Called any time a new level is started (after GameInit() also on level transitions within a game)
 bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, char const *pOldLevel, char const *pLandmarkName, bool loadGame, bool background )
 {
@@ -1015,6 +1016,7 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 	{
 		SetupGameInstallBits();
 	}
+	g_bFirstFrameSimulated = false;
 #endif
 
 #ifdef USES_ECON_ITEMS
@@ -1271,21 +1273,14 @@ void CServerGameDLL::GameFrame( bool simulating )
 		gpGlobals->frametime *= 2.0f;
 	}
 	
-
 	bool bSimulateEntities = true;
 #ifdef PORTAL
-	if ( PortalGameRules() )
+	if ( PortalGameRules()->ShouldPauseGame() || !g_bFirstFrameSimulated )
 	{
-		if ( PortalGameRules()->ShouldPauseGame() &&
-			gpGlobals->curtime != 0 // Simulate once so entities can load
-			)
-		{
-			bSimulateEntities = false;
-		}
+		bSimulateEntities = false;
+		g_bFirstFrameSimulated = true; // The first frame was simulated
 	}
 #endif
-
-	bSimulateEntities = true;
 
 	float oldframetime = gpGlobals->frametime;
 

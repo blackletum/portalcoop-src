@@ -76,6 +76,7 @@ public:
 	virtual void	ClientSettingsChanged( CBasePlayer *pPlayer );
 	virtual void	GoToIntermission( void );
 #ifndef CLIENT_DLL
+	virtual void	LevelInitPreEntity( void ) OVERRIDE;
 	virtual bool	ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 	virtual bool	ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target );
 	virtual float	GetAutoAimScale( CBasePlayer *pPlayer );
