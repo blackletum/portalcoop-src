@@ -1604,6 +1604,13 @@ bool CPortalGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 			return false;
 		}
 	}
+
+	// Energy balls shouldn't collide with portalguns
+	if ( collisionGroup0 == COLLISION_GROUP_WEAPON && collisionGroup1 == COLLISION_GROUP_PROJECTILE )
+	{
+		return false;
+	}
+
 	return BaseClass::ShouldCollide( collisionGroup0, collisionGroup1 ); 
 }
 

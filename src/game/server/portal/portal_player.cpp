@@ -810,9 +810,12 @@ CPortal_Player::~CPortal_Player(void)
 	*/
 }
 
+bool g_bRemovingPortalPlayer = false;
 void CPortal_Player::UpdateOnRemove(void)
 {
+	g_bRemovingPortalPlayer = true;
 	BaseClass::UpdateOnRemove();
+	g_bRemovingPortalPlayer = false;
 }
 
 void CPortal_Player::Precache(void)

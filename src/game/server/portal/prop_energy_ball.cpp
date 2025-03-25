@@ -46,6 +46,8 @@ public:
 	virtual void StartTouch( CBaseEntity *pOther );
 	virtual void NotifySystemEvent( CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params );
 
+	virtual bool ShouldCollide( int collisionGroup, int contentsMask ) const OVERRIDE;
+
 	bool HandleSpecialEntityImpact( CBaseEntity *pOther, bool bDoAnything );
 
 	CHandle<CProp_Portal>		m_hTouchedPortal;	// Pointer to the portal we are touched most recently
@@ -246,6 +248,8 @@ void CPropEnergyBall::VPhysicsCollision( int index, gamevcollisionevent_t *pEven
 			pEntity = pEvent->pEntities[1];
 		}
 
+		Assert( !pEntity || !FClassnameIs(pEntity, "weapon_portalgun" ) );
+
 		bool bDoEffects = true;
 
 		// Only place decals and draw effects if we hit something valid
@@ -321,6 +325,14 @@ void CPropEnergyBall::NotifySystemEvent(CBaseEntity *pNotify, notify_system_even
 	}
 
 	//BaseClass::NotifySystemEvent( pNotify, eventType, params );
+}
+
+bool CPropEnergyBall::ShouldCollide( int collisionGroup, int contentsMask ) const
+{
+	if ( collisionGroup == COLLISION_GROUP_WEAPON )
+		return false;
+
+	return BaseClass::ShouldCollide( collisionGroup, contentsMask );
 }
 
 bool CPropEnergyBall::HandleSpecialEntityImpact( CBaseEntity *pOther, bool bDoAnything )

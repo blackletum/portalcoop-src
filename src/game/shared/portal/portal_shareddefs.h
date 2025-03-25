@@ -112,10 +112,12 @@ extern KeyValues *LoadMapDataForMap( const char *map );
 class CMapInfo
 {
 public:
-	unsigned char GetRequiredPlayers() { return m_iRequiredPlayers; }
+	void Reset();
+
+	int GetRequiredPlayers() { return m_iRequiredPlayers; }
 
 private:
-	unsigned char m_iRequiredPlayers;
+	int m_iRequiredPlayers;
 
 	friend class CMapDataLoader;
 };

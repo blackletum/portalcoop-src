@@ -36,6 +36,11 @@ KeyValues *LoadRadioData()
 	return radios;
 }
 
+void CMapInfo::Reset( void )
+{
+	g_MapInfo.m_iRequiredPlayers = -1;
+}
+
 CMapInfo g_MapInfo;
 
 int GetRequiredPlayers()
@@ -113,6 +118,8 @@ void CMapDataLoader::LevelInitPreEntity()
 			AssertMsg( false, "Failed to load map data" );
 		}
 #endif
+
+		g_MapInfo.Reset();
 		return;
 	}
 
