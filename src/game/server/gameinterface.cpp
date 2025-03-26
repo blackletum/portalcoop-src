@@ -1134,6 +1134,9 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 	// clear any pending autosavedangerous
 	m_fAutoSaveDangerousTime = 0.0f;
 	m_fAutoSaveDangerousMinHealthToCommit = 0.0f;
+#ifdef PORTAL
+	PortalGameRules()->CheckShouldPause();
+#endif
 	return true;
 }
 
@@ -1337,7 +1340,10 @@ void CServerGameDLL::GameFrame( bool simulating )
 	
 	// UNDONE: Make these systems IGameSystems and move these calls into FrameUpdatePostEntityThink()
 	// service event queue, firing off any actions whos time has come
-	ServiceEventQueue();
+	if ( bSimulateEntities )
+	{
+		ServiceEventQueue();
+	}
 
 	// free all ents marked in think functions
 	gEntList.CleanupDeleteList();
