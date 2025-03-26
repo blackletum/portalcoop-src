@@ -1265,6 +1265,11 @@ void CPortalGameMovement::HandlePortallingLegacy( void )
 #endif
 	}
 
+	if ( player->IsBot() )
+	{
+		void TransformBotAngles( int index, VMatrix matThisToLinked );
+		TransformBotAngles( player->entindex(), pPortal->MatrixThisToLinked() );
+	}
 
 	mv->m_vecVelocity = vNewVelocity;
 	
