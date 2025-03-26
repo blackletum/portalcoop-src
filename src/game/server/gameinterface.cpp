@@ -1326,6 +1326,7 @@ void CServerGameDLL::GameFrame( bool simulating )
 		Physics_RunThinkFunctions( simulating );
 		IGameSystem::FrameUpdatePostEntityThinkAllSystems();
 	}
+#ifdef PORTAL
 	else
 	{
 		for ( int i = 1; i <= gpGlobals->maxClients; ++i )
@@ -1333,10 +1334,16 @@ void CServerGameDLL::GameFrame( bool simulating )
 			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
 			if ( !pPlayer )
 				continue;
-			pPlayer->RunNullCommand();
-			pPlayer->RemoveAllCommandContexts();
+
+			// Simulating the player is very important
+			// 1. Commands should still be ran
+			// 2. Only running fake commands will cause problems with the portalgun projectile (and maybe other things)
+
+			// The portal gamerules freezes players, so it should be ok to fully simulate players since they can't move or do anything.
+			pPlayer->PhysicsSimulate();
 		}
 	}
+#endif
 	
 	// UNDONE: Make these systems IGameSystems and move these calls into FrameUpdatePostEntityThink()
 	// service event queue, firing off any actions whos time has come
