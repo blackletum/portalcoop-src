@@ -1242,7 +1242,7 @@ void CHLClient::PostInit()
 
 	if ( IsNewSDK() )
 	{
-		Error( "The previous2021 beta is not selected for Source SDK Base 2013 Multiplayer, see readme.txt for instructions." );
+		Error( "The previous2021 beta must be selected for Source SDK Base 2013 Multiplayer to play this mod, see readme.txt for instructions." );
 	}
 
 #ifdef SIXENSE
