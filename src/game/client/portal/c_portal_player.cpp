@@ -1228,6 +1228,10 @@ int C_Portal_Player::DrawModel( int flags )
 	if ( !m_bReadyToDraw )
 		return 0;
 
+	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( pLocalPlayer && pLocalPlayer->GetObserverTarget() == this && pLocalPlayer->GetObserverMode() == OBS_MODE_IN_EYE )
+		return 0;
+
 	if( IsLocalPlayer() )
 	{
 		if ( !C_BasePlayer::ShouldDrawThisPlayer() )

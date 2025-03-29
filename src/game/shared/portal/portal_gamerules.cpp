@@ -505,16 +505,21 @@ const char *CPortalGameRules::GetGameDescription( void )
 	//-----------------------------------------------------------------------------
 	void CPortalGameRules::PlayerSpawn( CBasePlayer *pPlayer )
 	{
+		// Do not spawn players with the portalgun if they're supposed to be a spectator
+		CPortal_Player *pPortalPlayer = static_cast<CPortal_Player*>( pPlayer );
+		if ( pPortalPlayer->WantsToBeObserver() )
+			return;
+
 		if (sv_portalgun_spawn.GetBool())
 		{
 			CWeaponPortalgun *pPortalgun = (CWeaponPortalgun*)pPlayer->GiveNamedItem("weapon_portalgun");
 
-			((CPortal_Player*)pPlayer)->m_bForceBumpWeapon = true;
+			pPortalPlayer->m_bForceBumpWeapon = true;
 			if ( pPlayer->BumpWeapon( pPortalgun ) )
 			{
 				pPortalgun->OnPickedUp( pPlayer );
 			}
-			((CPortal_Player*)pPlayer)->m_bForceBumpWeapon = false;
+			pPortalPlayer->m_bForceBumpWeapon = false;
 
 			if (sv_portalgun_color.GetInt() == 0)
 			{
@@ -534,20 +539,20 @@ const char *CPortalGameRules::GetGameDescription( void )
 		}
 		else
 		{
-			if ( ((CPortal_Player*)pPlayer)->m_PortalGunSpawnInfo.m_bSpawnWithPortalgun )
+			if ( pPortalPlayer->m_PortalGunSpawnInfo.m_bSpawnWithPortalgun )
 			{
 				CWeaponPortalgun *pPortalgun = (CWeaponPortalgun *)pPlayer->GiveNamedItem( "weapon_portalgun" );
 				if ( pPortalgun )
 				{
-					((CPortal_Player*)pPlayer)->m_bForceBumpWeapon = true;
+					pPortalPlayer->m_bForceBumpWeapon = true;
 					if ( pPlayer->BumpWeapon( pPortalgun ) )
 					{
 						pPortalgun->OnPickedUp( pPlayer );
 					}
-					((CPortal_Player*)pPlayer)->m_bForceBumpWeapon = false;
+					pPortalPlayer->m_bForceBumpWeapon = false;
 
-					pPortalgun->m_bCanFirePortal1 = ((CPortal_Player*)pPlayer)->m_PortalGunSpawnInfo.m_bCanFirePortal1;
-					pPortalgun->m_bCanFirePortal2 = ((CPortal_Player*)pPlayer)->m_PortalGunSpawnInfo.m_bCanFirePortal2;
+					pPortalgun->m_bCanFirePortal1 = pPortalPlayer->m_PortalGunSpawnInfo.m_bCanFirePortal1;
+					pPortalgun->m_bCanFirePortal2 = pPortalPlayer->m_PortalGunSpawnInfo.m_bCanFirePortal2;
 				}
 			}
 		}
