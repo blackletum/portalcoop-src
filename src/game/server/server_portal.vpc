@@ -361,6 +361,7 @@ $Project "Server (Portal)"
 			$File	"portal\trigger_ball_destroyer.cpp"
 			$File	"portal\prop_box.cpp"
 			$File	"portal\prop_box.h"
+			$File	"portal\func_switch.cpp"
 
 			$Folder	"Weapons"
 			{
