@@ -426,7 +426,7 @@ void CPortalGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 	const char* pszFov = engine->GetClientConVarValue(pPlayer->entindex(),
 		"fov_desired");
 	int iFov = atoi(pszFov);
-	iFov = clamp(iFov, 70, MAX_FOV);
+	iFov = clamp(iFov, 75, MAX_FOV);
 	pPortalPlayer->SetDefaultFOV(iFov);
 
 	BaseClass::ClientSettingsChanged(pPlayer);
