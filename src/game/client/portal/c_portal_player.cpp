@@ -61,7 +61,35 @@ extern ConVar cl_sidespeed;
 
 ConVar cl_reorient_in_air("cl_reorient_in_air", "1", FCVAR_ARCHIVE, "Allows the player to only reorient from being upside down while in the air." ); 
 
-ConVar cl_viewmodels_offset_override("cl_viewmodels_offset_override", "", FCVAR_ARCHIVE, "If set, this will override the position of all viewmodels. Usage 'x y z'");
+// -------------------------------------------------------------------------------- //
+// Validate viewmodel offsets
+// -------------------------------------------------------------------------------- //
+
+
+void ValidateViewmodelOffsetCallback(IConVar* var, const char* pOldValue, float flOldValue)
+{
+	ConVarRef cvar(var);
+	const char* pszValue = cvar.GetString();
+
+	if (!pszValue || !pszValue[0])
+		return;
+
+	float x, y, z;
+	if (sscanf(pszValue, "%f %f %f", &x, &y, &z) == 3)
+	{
+		const float kMax = 48.0f;
+		if (fabsf(x) > kMax || fabsf(y) > kMax || fabsf(z) > kMax)
+		{
+			Warning("cl_viewmodels_offset_override values must be between -48 and 48. Rejecting change.\n");
+			cvar.SetValue(pOldValue);
+			return;
+		}
+	}
+}
+
+//had to put this after the validation, probably not right but uhh idk what im doin lmao - saint
+
+ConVar cl_viewmodels_offset_override("cl_viewmodels_offset_override", "", FCVAR_ARCHIVE, "If set, this will override the position of all viewmodels. Usage 'x y z'", ValidateViewmodelOffsetCallback);
 
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
