@@ -61,6 +61,8 @@ extern ConVar cl_sidespeed;
 
 ConVar cl_reorient_in_air("cl_reorient_in_air", "1", FCVAR_ARCHIVE, "Allows the player to only reorient from being upside down while in the air." ); 
 
+ConVar cl_viewmodels_offset_override("cl_viewmodels_offset_override", "", FCVAR_ARCHIVE, "If set, this will override the position of all viewmodels. Usage 'x y z'");
+
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
 // -------------------------------------------------------------------------------- //
@@ -2888,6 +2890,18 @@ void C_Portal_Player::CalcViewModelView( const Vector& eyeOrigin, const QAngle& 
 	{
 		float fT = vForward.z * vForward.z;
 		vInterpEyeOrigin += vRight * ( fT * 4.7f ) + vForward * ( fT * 5.0f ) + vUp * ( fT * 4.0f );
+	}
+
+	const char* pszOverride = cl_viewmodels_offset_override.GetString();
+	if (pszOverride && pszOverride[0])
+	{
+		float x, y, z;
+		if (sscanf(pszOverride, "%f %f %f", &x, &y, &z) == 3)
+		{
+			vInterpEyeOrigin += vForward * x;
+			vInterpEyeOrigin += vRight * y;
+			vInterpEyeOrigin += vUp * z;
+		}
 	}
 	
 	if ( UTIL_EntityIsIntersectingPortalWithLinkedAlsoBeingFloorOrCeiling( this ) )
